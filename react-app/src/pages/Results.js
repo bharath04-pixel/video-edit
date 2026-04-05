@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, Card, CardContent, Grid, Tabs, Tab } from '@mui/material';
+import { Box, Typography, Button, Card, CardContent, Grid, Tabs, Tab, CircularProgress, Chip } from '@mui/material';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8000/api';
@@ -10,6 +10,8 @@ const Results = () => {
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [downloading, setDownloading] = useState(false);
+  const [effectsData, setEffectsData] = useState(null);
+  const [loadingEffects, setLoadingEffects] = useState(false);
   
   // Safely extract data
   let videoData = null;
@@ -42,6 +44,24 @@ const Results = () => {
   }
 
   const detections = processedData?.detections || {};
+
+  // Fetch effects analysis
+  useEffect(() => {
+    if (videoData?.id && !effectsData) {
+      const fetchEffects = async () => {
+        try {
+          setLoadingEffects(true);
+          const response = await axios.get(`${API_URL}/analyze/${videoData.id}`);
+          setEffectsData(response.data);
+        } catch (error) {
+          console.error('Failed to fetch effects:', error);
+        } finally {
+          setLoadingEffects(false);
+        }
+      };
+      fetchEffects();
+    }
+  }, [videoData, effectsData]);
 
   const handleDownload = async () => {
     try {
@@ -128,6 +148,7 @@ const Results = () => {
         >
           <Tab label="Summary" />
           <Tab label="Detections" />
+          <Tab label="Effects Analysis" />
           <Tab label="Export" />
         </Tabs>
 
@@ -223,7 +244,215 @@ const Results = () => {
           )}
 
           {tabValue === 2 && (
-            // Export Tab
+            // Effects Analysis Tab
+            <Box>
+              {loadingEffects ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <CircularProgress />
+                  <Typography sx={{ mt: 2, color: 'white' }}>Analyzing effects...</Typography>
+                </Box>
+              ) : effectsData?.effects && effectsData.effects.length > 0 ? (
+                <>
+                  {/* Effects Overview */}
+                  <Card sx={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    mb: 3
+                  }}>
+                    <CardContent>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#667eea' }}>
+                        🎨 Detected Effects
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                        {effectsData.effects.map((effect, idx) => (
+                          <Chip
+                            key={idx}
+                            label={effect}
+                            sx={{
+                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              color: 'white',
+                              fontWeight: 'bold'
+                            }}
+                          />
+                        ))}
+                      </Box>
+                      <Typography variant="body2" sx={{ color: '#999' }}>
+                        Confidence: {Math.round((effectsData.confidence || 0) * 100)}%
+                      </Typography>
+                    </CardContent>
+                  </Card>
+
+                  {/* Color Grading */}
+                  {effectsData.color_grading?.detected && (
+                    <Card sx={{
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      mb: 3
+                    }}>
+                      <CardContent>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#667eea' }}>
+                          🎞️ Color Grading
+                        </Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6}>
+                            <Typography variant="caption" sx={{ color: '#999' }}>Tone</Typography>
+                            <Typography sx={{ color: 'white', fontWeight: 'bold' }}>
+                              {effectsData.color_grading.tone}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Typography variant="caption" sx={{ color: '#999' }}>Deviation</Typography>
+                            <Typography sx={{ color: 'white', fontWeight: 'bold' }}>
+                              {(effectsData.color_grading.deviation * 100).toFixed(1)}%
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                        {effectsData.color_grading.rgb_balance && (
+                          <Box sx={{ mt: 2 }}>
+                            <Typography variant="caption" sx={{ color: '#999' }}>RGB Balance</Typography>
+                            <Grid container spacing={1} sx={{ mt: 0.5 }}>
+                              <Grid item xs={4}>
+                                <Box sx={{ background: 'rgba(255,0,0,0.3)', p: 1, borderRadius: 1, textAlign: 'center' }}>
+                                  <Typography variant="caption" sx={{ color: 'white' }}>
+                                    R: {Math.round(effectsData.color_grading.rgb_balance.r)}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                              <Grid item xs={4}>
+                                <Box sx={{ background: 'rgba(0,255,0,0.3)', p: 1, borderRadius: 1, textAlign: 'center' }}>
+                                  <Typography variant="caption" sx={{ color: 'white' }}>
+                                    G: {Math.round(effectsData.color_grading.rgb_balance.g)}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                              <Grid item xs={4}>
+                                <Box sx={{ background: 'rgba(0,0,255,0.3)', p: 1, borderRadius: 1, textAlign: 'center' }}>
+                                  <Typography variant="caption" sx={{ color: 'white' }}>
+                                    B: {Math.round(effectsData.color_grading.rgb_balance.b)}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Brightness & Contrast */}
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    {effectsData.brightness_adjustments && effectsData.brightness_adjustments.length > 0 && (
+                      <Grid item xs={12} sm={6}>
+                        <Card sx={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          height: '100%'
+                        }}>
+                          <CardContent>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#667eea' }}>
+                              ☀️ Brightness
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#999' }}>Mean</Typography>
+                            <Typography sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>
+                              {Math.round(effectsData.brightness_adjustments[0].mean_brightness)}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#999' }}>Variation</Typography>
+                            <Typography sx={{ color: 'white', fontWeight: 'bold' }}>
+                              {(effectsData.brightness_adjustments[0].variation || 0).toFixed(1)}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    )}
+                    
+                    {effectsData.contrast_adjustments && effectsData.contrast_adjustments.length > 0 && (
+                      <Grid item xs={12} sm={6}>
+                        <Card sx={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          height: '100%'
+                        }}>
+                          <CardContent>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#667eea' }}>
+                              📊 Contrast
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#999' }}>Mean Contrast</Typography>
+                            <Typography sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>
+                              {Math.round(effectsData.contrast_adjustments[0].mean_contrast || 0)}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#999' }}>Intensity</Typography>
+                            <Typography sx={{ color: 'white', fontWeight: 'bold' }}>
+                              High
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    )}
+                  </Grid>
+
+                  {/* Transitions */}
+                  {effectsData.transitions && effectsData.transitions.length > 0 && (
+                    <Card sx={{
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      mb: 3
+                    }}>
+                      <CardContent>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#667eea' }}>
+                          ➡️ Transitions Detected
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'white', mb: 2 }}>
+                          Count: {effectsData.transitions[0].count || 0}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#999' }}>
+                          Detected transitions include cuts, fades, and other scene changes
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Blur Effects */}
+                  {effectsData.blur_effects && effectsData.blur_effects.length > 0 && (
+                    <Card sx={{
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      mb: 3
+                    }}>
+                      <CardContent>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#667eea' }}>
+                          🌫️ Blur Effects
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'white', mb: 1 }}>
+                          Intensity: {effectsData.blur_effects[0].intensity}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#999' }}>
+                          Blur Score: {(effectsData.blur_effects[0].blur_score || 0).toFixed(2)}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              ) : (
+                <Card sx={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  textAlign: 'center',
+                  py: 4
+                }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ color: '#999' }}>
+                      No effects detected in this video
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#666', mt: 1 }}>
+                      Try uploading a video with editing effects applied
+                    </Typography>
+                  </CardContent>
+                </Card>
+              )}
+            </Box>
+          )}
+
+          {tabValue === 3 && (
             <Box>
               <Card sx={{
                 background: 'rgba(255,255,255,0.05)',

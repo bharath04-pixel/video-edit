@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 import logging
 from services.video_processor import VideoProcessor
 from services.ai_service import AIService
+from services.effects_analyzer import EffectsAnalyzer
 
 # Load environment variables
 load_dotenv()
@@ -59,6 +60,7 @@ app.mount("/outputs", StaticFiles(directory=str(OUTPUT_DIR)), name="outputs")
 # Initialize services
 video_processor = VideoProcessor()
 ai_service = AIService()
+effects_analyzer = EffectsAnalyzer()
 
 # ============================================================================
 # HEALTH & INFO ENDPOINTS
@@ -353,6 +355,86 @@ async def download_video(filename: str):
     except Exception as e:
         logger.error(f"✗ Download error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")
+
+# ============================================================================
+# EFFECTS ANALYSIS ENDPOINT
+# ============================================================================
+
+@app.post("/api/analyze/{video_id}")
+async def analyze_effects(video_id: str):
+    """
+    Analyze effects used in a video
+    
+    Args:
+        video_id: Video ID to analyze
+    
+    Returns:
+        {
+            "effects": ["Brightness Adjustment", "Color Grading", ...],
+            "color_grading": {...},
+            "brightness_adjustments": [...],
+            "transitions": [...],
+            "confidence": 0.85
+        }
+    """
+    try:
+        # Find video file
+        video_files = list(UPLOAD_DIR.glob(f"{video_id}_*"))
+        if not video_files:
+            raise HTTPException(status_code=404, detail="Video not found")
+        
+        video_path = str(video_files[0])
+        
+        # Analyze effects
+        effects_data = effects_analyzer.analyze_video(video_path)
+        
+        logger.info(f"✓ Effects analyzed for video: {video_id}")
+        
+        return {
+            "status": "success",
+            "video_id": video_id,
+            **effects_data
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"✗ Effects analysis error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+@app.get("/api/analyze/{video_id}")
+async def get_effects_analysis(video_id: str):
+    """
+    Get effects analysis for an uploaded video
+    
+    Args:
+        video_id: Video ID to analyze
+    
+    Returns:
+        Effects analysis results
+    """
+    try:
+        # Find video file
+        video_files = list(UPLOAD_DIR.glob(f"{video_id}_*"))
+        if not video_files:
+            raise HTTPException(status_code=404, detail="Video not found")
+        
+        video_path = str(video_files[0])
+        
+        # Analyze effects
+        effects_data = effects_analyzer.analyze_video(video_path)
+        
+        return {
+            "status": "success",
+            "video_id": video_id,
+            **effects_data
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"✗ Effects analysis error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 # ============================================================================
 # CLEANUP ENDPOINT
