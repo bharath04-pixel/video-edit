@@ -13,7 +13,7 @@ const Results = () => {
   const [effectsData, setEffectsData] = useState(null);
   const [loadingEffects, setLoadingEffects] = useState(false);
   
-  // Safely extract data
+  // Safely extract data - MUST be before early returns
   let videoData = null;
   let processedData = null;
   
@@ -32,20 +32,7 @@ const Results = () => {
     console.error('Error extracting results data:', e);
   }
 
-  if (!videoData || !processedData) {
-    return (
-      <Box sx={{ textAlign: 'center', py: 8, color: 'white' }}>
-        <Typography variant="h5">No results to display</Typography>
-        <Button onClick={() => navigate('/upload')} sx={{ mt: 2 }}>
-          Upload Video
-        </Button>
-      </Box>
-    );
-  }
-
-  const detections = processedData?.detections || {};
-
-  // Fetch effects analysis
+  // Fetch effects analysis - MUST be before early return
   useEffect(() => {
     if (videoData?.id && !effectsData) {
       const fetchEffects = async () => {
@@ -61,7 +48,21 @@ const Results = () => {
       };
       fetchEffects();
     }
-  }, [videoData, effectsData]);
+  }, [videoData?.id, effectsData]);
+
+  // Early return after all hooks
+  if (!videoData || !processedData) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 8, color: 'white' }}>
+        <Typography variant="h5">No results to display</Typography>
+        <Button onClick={() => navigate('/upload')} sx={{ mt: 2 }}>
+          Upload Video
+        </Button>
+      </Box>
+    );
+  }
+
+  const detections = processedData?.detections || {};
 
   const handleDownload = async () => {
     try {
