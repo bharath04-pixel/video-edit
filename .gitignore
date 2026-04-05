@@ -1,0 +1,45 @@
+# Flutter
+build/
+ios/
+android/
+.dart_tool/
+.flutter-plugins
+.packages
+
+# Python
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/.env
+backend/.env.local
+*.egg-info/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+.thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# API Keys
+.env
+.env.local
+api_keys.txt
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

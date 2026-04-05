@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/outputs:/app/outputs
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - UPLOAD_DIR=/app/uploads
+      - OUTPUT_DIR=/app/outputs
+      - GOOGLE_VISION_API_KEY=${GOOGLE_VISION_API_KEY}
+      - REMOVEBG_API_KEY=${REMOVEBG_API_KEY}
+    networks:
+      - video-editor-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  video-editor-network:
+    driver: bridge
+
+volumes:
+  uploads:
+  outputs:

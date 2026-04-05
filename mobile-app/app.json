@@ -1,0 +1,41 @@
+{
+  "name": "AI Video Editor",
+  "package": "com.aivideoeditor.app",
+  "version": "1.0.0",
+  "buildNumber": 1,
+  "description": "Professional video editing powered by artificial intelligence",
+  "author": "AI Video Editor Team",
+  "homepage": "http://localhost:8001",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bharath04-pixel/video-edit"
+  },
+  "dependencies": {
+    "react-native": "^0.71.0",
+    "react-native-video": "^5.2.0",
+    "react-native-gesture-handler": "^2.0.0",
+    "react-native-reanimated": "^2.0.0",
+    "@react-native-camera/camera": "^4.1.0",
+    "axios": "^1.4.0",
+    "react-native-fs": "^2.20.0"
+  },
+  "android": {
+    "minSdkVersion": 21,
+    "targetSdkVersion": 33,
+    "compileSdkVersion": 33,
+    "versionName": "1.0.0",
+    "versionCode": 1,
+    "permissions": [
+      "android.permission.INTERNET",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.CAMERA"
+    ]
+  },
+  "scripts": {
+    "android": "react-native run-android",
+    "build-apk": "cd android && ./gradlew assembleDebug",
+    "build-release": "cd android && ./gradlew assembleRelease",
+    "build-bundle": "cd android && ./gradlew bundleRelease"
+  }
+}

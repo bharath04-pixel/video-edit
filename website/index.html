@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Video Editor - Professional video editing powered by artificial intelligence">
+    <meta name="keywords" content="video editor, AI, machine learning, video processing">
+    <meta property="og:title" content="AI Video Editor">
+    <meta property="og:description" content="Edit videos with the power of AI">
+    <meta property="og:type" content="website">
+    <title>AI Video Editor - Professional Video Editing with AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --dark: #1a1a2e;
+            --light: #f0f0f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Navigation */
+        nav {
+            background: black;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 8rem 2rem;
+            text-align: center;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 2rem;
+            background: #f9f9f9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--dark);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: #666;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 4rem 2rem;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .step {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            font-size: 3rem;
+            font-weight: bold;
+            opacity: 0.2;
+            position: absolute;
+            top: -10px;
+            right: 20px;
+        }
+
+        .step h4 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .step p {
+            opacity: 0.9;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 4rem 2rem;
+            background: #f9f9f9;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .pricing-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 4px solid var(--primary);
+        }
+
+        .pricing-card.featured {
+            border-top: 4px solid var(--secondary);
+            transform: scale(1.05);
+        }
+
+        .price {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+
+        .features-list {
+            text-align: left;
+            margin: 2rem 0;
+            list-style: none;
+        }
+
+        .features-list li {
+            padding: 0.5rem 0;
+            color: #666;
+            border-bottom: 1px solid #eee;
+        }
+
+        .features-list li:before {
+            content: "✓ ";
+            color: var(--primary);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        /* Tech Stack Section */
+        .tech-stack {
+            padding: 4rem 2rem;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .tech-item {
+            padding: 1.5rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .tech-item-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-item h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-item p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: #999;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            padding-top: 2rem;
+            text-align: center;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">🎬 AI Video Editor</a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="http://localhost:3000" target="_blank">App</a></li>
+                <li><a href="http://localhost:8000/docs" target="_blank">API</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Transform Your Videos with AI</h1>
+        <p>Professional video editing powered by artificial intelligence. Edit, enhance, and analyze your videos with cutting-edge AI technology.</p>
+        <div class="cta-buttons">
+            <a href="http://localhost:3000" class="btn btn-primary">🚀 Launch App</a>
+            <a href="#features" class="btn btn-secondary">Learn More</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Powerful AI Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Text Detection</h3>
+                    <p>Automatically detect and extract text from your videos with optical character recognition powered by AI.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">😊</div>
+                    <h3>Face Recognition</h3>
+                    <p>Identify and track faces throughout your video. Perfect for creating highlights and compilations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Object Detection</h3>
+                    <p>Recognize and track objects in your videos. Useful for analysis, editing, and creative effects.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <h3>Video Enhancement</h3>
+                    <p>Automatically enhance brightness, contrast, and saturation for professional-looking results.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast Processing</h3>
+                    <p>Get results in minutes, not hours. Our AI engine processes videos at lightning speed.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📥</div>
+                    <h3>Easy Export</h3>
+                    <p>Download your edited videos in multiple formats. MP4, MOV, WebM and more supported.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>📤 Upload</h4>
+                    <p>Upload your video file. We support all major formats up to 512MB.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>🤖 Process</h4>
+                    <p>Our AI analyzes and processes your video with advanced algorithms.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>✨ Edit</h4>
+                    <p>Fine-tune the results with our intelligent editing tools.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>📥 Download</h4>
+                    <p>Download your professionally edited video in your preferred format.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section class="tech-stack">
+        <div class="container">
+            <h2 class="section-title">Built With Modern Technology</h2>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <div class="tech-item-icon">⚛️</div>
+                    <h4>React</h4>
+                    <p>Modern web UI</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-item-icon">🐍</div>
+                    <h4>FastAPI</h4>
+                    <p>High-performance backend</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-item-icon">🎬</div>
+                    <h4>FFmpeg</h4>
+                    <p>Video processing</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-item-icon">🤖</div>
+                    <h4>OpenCV</h4>
+                    <p>AI/ML algorithms</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-item-icon">🍃</div>
+                    <h4>MongoDB</h4>
+                    <p>Data storage</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-item-icon">🐳</div>
+                    <h4>Docker</h4>
+                    <p>Containerization</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <h2 class="section-title">Simple Pricing</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Free</h3>
+                    <div class="price">$0</div>
+                    <p>Per month</p>
+                    <ul class="features-list">
+                        <li>5 GB storage</li>
+                        <li>720p resolution</li>
+                        <li>Basic features</li>
+                        <li>Community support</li>
+                    </ul>
+                    <button class="btn btn-primary">Get Started</button>
+                </div>
+                <div class="pricing-card featured">
+                    <h3>Pro</h3>
+                    <div class="price">$29</div>
+                    <p>Per month</p>
+                    <ul class="features-list">
+                        <li>100 GB storage</li>
+                        <li>4K resolution</li>
+                        <li>All AI features</li>
+                        <li>Priority support</li>
+                        <li>Batch processing</li>
+                    </ul>
+                    <button class="btn btn-primary">Start Free Trial</button>
+                </div>
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="price">Custom</div>
+                    <p>Contact us</p>
+                    <ul class="features-list">
+                        <li>Unlimited storage</li>
+                        <li>8K resolution</li>
+                        <li>Custom integrations</li>
+                        <li>Dedicated support</li>
+                        <li>API access</li>
+                    </ul>
+                    <button class="btn btn-primary">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="#">Features</a></li>
+                    <li><a href="#">Pricing</a></li>
+                    <li><a href="#">Security</a></li>
+                    <li><a href="#">Roadmap</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="http://localhost:8000/docs">API Documentation</a></li>
+                    <li><a href="#">Tutorials</a></li>
+                    <li><a href="#">Support</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                    <li><a href="#">License</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 AI Video Editor. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

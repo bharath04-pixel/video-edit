@@ -1,0 +1,188 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ai-video-editor
+
+jobs:
+  # ====================================================================
+  # BACKEND TESTS
+  # ====================================================================
+  
+  backend-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r backend/requirements.txt
+        pip install pytest pytest-cov
+    
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 backend/ --count --select=E9,F63,F7,F82 --show-source --statistics
+    
+    - name: Test with pytest
+      run: |
+        pytest backend/tests/ -v --cov=backend/app
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v2
+  
+  # ====================================================================
+  # FRONTEND TESTS
+  # ====================================================================
+  
+  flutter-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.0.0'
+    
+    - name: Get dependencies
+      run: |
+        cd frontend
+        flutter pub get
+    
+    - name: Run tests
+      run: |
+        cd frontend
+        flutter test
+    
+    - name: Analyze
+      run: |
+        cd frontend
+        flutter analyze
+  
+  # ====================================================================
+  # BUILD DOCKER IMAGE
+  # ====================================================================
+  
+  build-docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    
+    - name: Login to Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./backend/Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+  
+  # ====================================================================
+  # SECURITY SCAN
+  # ====================================================================
+  
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Run Trivy Vulnerability Scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: 'backend'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy results
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: 'trivy-results.sarif'
+  
+  # ====================================================================
+  # DEPLOY TO STAGING
+  # ====================================================================
+  
+  deploy-staging:
+    needs: [backend-tests, flutter-tests, build-docker]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Deploy to Staging
+      env:
+        DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
+        DEPLOY_HOST: ${{ secrets.STAGING_HOST }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+        ssh ubuntu@$DEPLOY_HOST 'cd /opt/ai-video-editor && git pull && docker-compose up -d'
+  
+  # ====================================================================
+  # DEPLOY TO PRODUCTION
+  # ====================================================================
+  
+  deploy-production:
+    needs: [backend-tests, flutter-tests, build-docker]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Deploy to Production
+      env:
+        DEPLOY_KEY: ${{ secrets.PROD_DEPLOY_KEY }}
+        DEPLOY_HOST: ${{ secrets.PROD_HOST }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+        ssh ubuntu@$DEPLOY_HOST 'cd /opt/ai-video-editor && git pull && docker-compose up -d'
+    
+    - name: Notify Deployment
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: 'Production deployment ${{ job.status }}'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
